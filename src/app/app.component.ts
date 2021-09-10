@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 
 const template = /*html*/`
 <div class="container mt-5">
@@ -7,7 +7,9 @@ const template = /*html*/`
     <div class="video">
       <video 
         id="video"
-        controls>
+        onplay
+        controls
+        #videoPlayer>
 
 		    <source src="/assets/video.mp4" type='video/mp4' />
 
@@ -34,21 +36,30 @@ const styles = [/*css*/`
   template,
   styles
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements AfterViewInit {
+  @ViewChild('videoPlayer', { static: false }) player: ElementRef;
 
   title = 'VideoTrackingEvents';
   isPlaying: boolean = false;
+  userStartedVideo: boolean = false;
 
   constructor(
   ) { }
 
-  ngOnInit(): void {
-  }
+  ngAfterViewInit(): void {
+    const video: HTMLVideoElement = this.player.nativeElement;
+    
+    video.onplaying = () => {
+      console.log("user clicked play");
+    }
 
-  @ViewChild('videoPlayer', { static: false }) player: ElementRef;
+    video.onpause = () => {
+      console.log("user clicked pause");
+    }
 
-  onUserPlay() {
-    console.log("user played");
+    video.onreset = () => {
+      console.log("user reset video");
+    }
   }
 
   onClickPlay() {
