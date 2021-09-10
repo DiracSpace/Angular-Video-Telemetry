@@ -7,8 +7,6 @@ const template = /*html*/`
     <div class="video">
       <video 
         id="video"
-        onplay
-        controls
         #videoPlayer>
 
 		    <source src="/assets/video.mp4" type='video/mp4' />
