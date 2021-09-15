@@ -41,7 +41,7 @@ export class VideoProgressBarComponent implements OnInit {
 
   beeImg: HTMLElement;
 
-  // TODO implement fowarding through sections
+  // TODO implement fowarding through sectionsd
 
   constructor() { }
 
