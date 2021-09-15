@@ -1,24 +1,32 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 
 const template = /*html*/`
 <div class="container mt-5">
   <div class="d-flex justify-content-center align-items-center flex-column">
 
     <div class="video">
+
       <video 
         id="video"
         #videoPlayer>
-
 		    <source src="/assets/video.mp4" type='video/mp4' />
-
 	    </video>
+
+      <app-video-progress-bar
+        [(progress)]="progress">        
+      </app-video-progress-bar>
     </div>
 
-    <div class="btn-group" role="group" aria-label="Basic example">
-      <button (click)="onClickPlay()" type="button" class="btn btn-primary">play</button>
-      <button (click)="onClickPause()" type="button" class="btn btn-primary">pause</button>
-      <button (click)="onClickRestart()" type="button" class="btn btn-primary">restart</button>
-      <button (click)="onClickRewind(-10)" type="button" class="btn btn-primary">rewind</button>
+    <div class="btn-group" role="group">
+      <button (click)="onClickPlay()" [disabled]="isPlaying" type="button" class="btn btn-primary">play</button>
+      <button (click)="onClickPause()" [disabled]="!isPlaying" type="button" class="btn btn-primary">pause</button>
+      <button (click)="onClickRestart()" [disabled]="!isPlaying" type="button" class="btn btn-primary">restart</button>
+      <button (click)="onClickRewind(5)" [disabled]="!isPlaying" type="button" class="btn btn-primary">rewind</button>
+      <button (click)="onClickFoward(5)" [disabled]="!isPlaying" type="button" class="btn btn-primary">foward</button>
+    </div>
+
+    <div class="container">
+      <p>status: {{ status }}</p>
     </div>
 
   </div>
@@ -35,58 +43,65 @@ const styles = [/*css*/`
   styles
 })
 export class AppComponent implements AfterViewInit {
-  @ViewChild('videoPlayer', { static: false }) player: ElementRef;
-
   title = 'VideoTrackingEvents';
+
+  // needed 
+  @ViewChild('videoPlayer', { static: false }) player: ElementRef;
+  video: HTMLVideoElement;
   isPlaying: boolean = false;
-  userStartedVideo: boolean = false;
+  progress: number = 0;
+
+  // not needed
+  status: string;
 
   constructor(
   ) { }
 
   ngAfterViewInit(): void {
-    const video: HTMLVideoElement = this.player.nativeElement;
-    
-    video.onplaying = () => {
-      console.log("user clicked play");
-    }
+    this.video = this.player.nativeElement;
 
-    video.onpause = () => {
-      console.log("user clicked pause");
-    }
+    // video event listener functions 
+    this.video.onplaying = () => { }
+    this.video.onpause = () => { }
+    this.video.onreset = () => { }
 
-    video.onreset = () => {
-      console.log("user reset video");
-    }
+    this.video.addEventListener("timeupdate", (event) => {
+      const events = event.target as HTMLVideoElement;
+      const position = 100 * ((Math.round(events.currentTime)) / events.duration);
+      this.progress = position;
+    })
   }
 
   onClickPlay() {
-    console.log("play");
-    const video: any = document.getElementById('video');
+    this.status = "playing";
+
     if (!this.isPlaying) {
-      video.play();
+      this.video.play();
       this.isPlaying = true;
     }
   }
 
   onClickPause() {
-    console.log("pause");
-    const video: any = document.getElementById('video');
+    this.status = `paused video at ${this.progress}`;
+
     if (this.isPlaying) {
-      video.pause();
+      this.video.pause();
       this.isPlaying = false;
     }
   }
 
   onClickRestart() {
-    console.log("restart");
-    const video: any = document.getElementById('video');
-    video.currentTime = 0;
+    this.status = "Restart";
+    this.video.currentTime = 0;
   }
 
   onClickRewind(value: number) {
-    console.log("rewind");
-    const video: any = document.getElementById('video');
-    video.currentTime += value;
+    this.status = `rewinding ${value}`;
+    this.video.currentTime -= value;
+  }
+
+  onClickFoward(value: number) {
+    this.status = `fowarding ${value}`;
+    this.video.currentTime += value;
   }
 }
